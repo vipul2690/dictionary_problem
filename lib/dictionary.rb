@@ -12,14 +12,18 @@ class Dictionary
                '7' => %w(p q r s), '8' => %w(t u v), '9' => %w(w x y z) }
     if is_valid?(@telephone_number)
       file_path = '../dictionary.txt'
-      dictionary = build_dictionary(file_path)
+      dictionary = %w(catamounts acta mounts act amounts act contour cat boot our)
       digit_to_key = @telephone_number.to_s.chars.map{|digit| mapping[digit]}
-      result = {}
-      two_word_combo(@telephone_number, 2, digit_to_key, dictionary, result)
-      result = result.sort.reverse.to_h
-      combinations = get_final_words(result)
-      final_words = []
       one_word_combos = get_single_words(@telephone_number, digit_to_key, dictionary)
+      two_word_combo = two_word_combo(@telephone_number, 2, dictionary, digit_to_key)
+      three_word_combo = three_word_combo(digit_to_key, dictionary)
+      print one_word_combos
+      combinations = []
+      combinations << get_final_words(one_word_combos)
+      combinations << get_final_words(two_word_combo)
+      combinations << get_final_words(three_word_combo)
+      final_words = []
+
       final_words << one_word_combos.each { |word| puts word.to_s }
       combinations.each do |combo|
         final_words << combo.to_csv.to_s.chop
@@ -43,35 +47,46 @@ class Dictionary
     dictionary
       end
 
-  def two_word_combo(input, index, digit_to_key_map, dictionary, results)
-    if index == input.to_s.length
-        return
+  def two_word_combo(input, index, dictionary, digit_to_key_map)
+    arr_length = input.to_s.length
+    possible_words = []
+    (index..arr_length - 3).each do |i|
+      num_length = digit_to_key_map.length
+      possible_words << extract_words([digit_to_key_map[0..i], digit_to_key_map[i+1..num_length-1]], dictionary)
     end
-    num_length = digit_to_key_map.length
-    first_word = digit_to_key_map[0..index]
-    second_word = digit_to_key_map[index+1..num_length]
-    word_store = []
-    if first_word.length < 3 || second_word.length < 3
-      helper(input, index+1, digit_to_key_map, dictionary, results)
-    else
-      word_store_one = first_word.shift.product(*first_word).map(&:join)
-      if word_store_one.nil?
-        helper(input, index+1, digit_to_key_map, dictionary, results)
-      end
-      word_store_two = second_word.shift.product(*second_word).map(&:join)
-      if word_store_two.nil?
-        helper(input, index+1, digit_to_key_map, dictionary,results)
-      end
-      results[index+1] = [(word_store_one & dictionary), (word_store_two & dictionary)]
-      helper(input, index+1, digit_to_key_map, dictionary, results)
-    end
+    possible_words
   end
 
-  def get_single_words(input, digit_to_key_map, dictionary)
-    input_length = input.to_s.length
-    word_map = digit_to_key_map[0..input_length]
-    words = word_map.shift.product(*word_map).map(&:join)
-    words & dictionary
+    def get_single_words(input, digit_to_key_map, dictionary)
+      input_length = input.to_s.length
+      word_map = digit_to_key_map[0..input_length]
+      words = word_map.shift.product(*word_map).map(&:join)
+      words & dictionary
+    end
+
+  def three_word_combo(digit_to_key_map, dictionary)
+    words = []
+    words << extract_words([digit_to_key_map[0..2], digit_to_key_map[3..5], digit_to_key_map[6..9]], dictionary)
+    words << extract_words([digit_to_key_map[0..2], digit_to_key_map[3..6], digit_to_key_map[7..9]], dictionary)
+    words << extract_words([digit_to_key_map[0..3], digit_to_key_map[4..6], digit_to_key_map[7..9]], dictionary)
+    words.reject! { |word| word.length == 0 }
+  end
+
+  def extract_words(char_array_map, dictionary)
+    word_matches = []
+    char_array_map.each do |char_array|
+      possible_words = char_array.shift.product(*char_array).map(&:join)
+      possible_words.reject! { |word| word.length < 3 }
+      possible_words.reject! { |word| !dictionary.include?(word) }
+      word_matches << possible_words
+    end
+    correct_words = []
+    if word_matches.size == 2
+      correct_words += word_matches[0].product(word_matches[1])
+    elsif word_matches.size == 3
+      correct_words += word_matches[0].product(word_matches[1]).product(word_matches[2]).map(&:flatten)
+    end
+    correct_words
   end
 
   def get_final_words(results)
