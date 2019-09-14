@@ -21,8 +21,8 @@ RSpec.describe Dictionary  do
 
   context 'returns word combinations for number when input is valid' do
 
-    response_one = %w(catamounts act,amounts act,contour cat,amounts cat,contour act,boot,our cat,boot,our)
-    response_two = ["motortruck", "motor,truck", "motor,usual", "noun,struck"]
+    response_one = %w(catamounts act,amounts act,contour cat,amounts cat,contour acta,mounts act,boot,our cat,boot,our)
+    response_two = %w(motortruck noun,struck motor,truck motor,usual not,opt,puck)
 
     it 'returns combination of words as array when input is 2282668687' do
       dictionary = Dictionary.new(2282668687)
@@ -35,7 +35,7 @@ RSpec.describe Dictionary  do
       dictionary = Dictionary.new(6686787825)
       allow(dictionary).to receive(:is_valid?).with(6686787825).and_return(true)
       allow(dictionary).to receive(:build_dictionary).with(any_args).and_return( %w( motortruck motor truck usual noun struck not opt puck))
-      expect(dictionary.letter_combinations).to eql(response)
+      expect(dictionary.letter_combinations).to eql(response_two)
     end
   end
 
