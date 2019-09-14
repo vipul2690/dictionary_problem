@@ -12,23 +12,24 @@ class Dictionary
                '7' => %w(p q r s), '8' => %w(t u v), '9' => %w(w x y z) }
     if is_valid?(@telephone_number)
       file_path = '../dictionary.txt'
-      dictionary = %w(catamounts acta mounts act amounts act contour cat boot our)
+      dictionary = %w(motortruck motor truck usual noun struck not opt puck)
       digit_to_key = @telephone_number.to_s.chars.map{|digit| mapping[digit]}
       one_word_combos = get_single_words(@telephone_number, digit_to_key, dictionary)
       two_word_combo = two_word_combo(@telephone_number, 2, dictionary, digit_to_key)
       three_word_combo = three_word_combo(digit_to_key, dictionary)
-      print one_word_combos
       combinations = []
-      combinations << get_final_words(one_word_combos)
-      combinations << get_final_words(two_word_combo)
-      combinations << get_final_words(three_word_combo)
+      print two_word_combo
+      combinations += one_word_combos
+      combinations += two_word_combo
+      combinations += three_word_combo
       final_words = []
-
-      final_words << one_word_combos.each { |word| puts word.to_s }
-      combinations.each do |combo|
-        final_words << combo.to_csv.to_s.chop
+      if(combinations.any?)
+        combinations.each do |combo|
+          result = combo.is_a?(Array) ? combo.first.to_csv.to_s.chop : combo.to_s
+          final_words << result
+        end
       end
-      print final_words
+      puts final_words
       final_words
     end
   end
@@ -53,6 +54,7 @@ class Dictionary
     (index..arr_length - 3).each do |i|
       num_length = digit_to_key_map.length
       possible_words << extract_words([digit_to_key_map[0..i], digit_to_key_map[i+1..num_length-1]], dictionary)
+      possible_words.reject! { |word| word.length == 0 }
     end
     possible_words
   end
@@ -87,16 +89,5 @@ class Dictionary
       correct_words += word_matches[0].product(word_matches[1]).product(word_matches[2]).map(&:flatten)
     end
     correct_words
-  end
-
-  def get_final_words(results)
-    final_words = []
-    results.each do |key, combinations|
-      next if combinations.first.nil? || combinations.last.nil?
-      combinations.first.product(combinations.last).each do |combo_words|
-        final_words << combo_words
-      end
-    end
-    final_words
   end
 end

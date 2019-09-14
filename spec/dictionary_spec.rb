@@ -21,8 +21,8 @@ RSpec.describe Dictionary  do
 
   context 'returns word combinations for number when input is valid' do
 
-    response_one = [["catamounts"], "acta,mounts", "act,amounts", "act,contour", "cat,amounts", "cat,contour"]
-    response_two = [["motortruck"], "motor,truck", "motor,usual", "noun,struck"]
+    response_one = %w(catamounts act,amounts act,contour cat,amounts cat,contour act,boot,our cat,boot,our)
+    response_two = ["motortruck", "motor,truck", "motor,usual", "noun,struck"]
 
     it 'returns combination of words as array when input is 2282668687' do
       dictionary = Dictionary.new(2282668687)
